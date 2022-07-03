@@ -1,0 +1,34 @@
+name: CI
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: macos-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - name: freebsd
+            version: "13.0"
+          - name: openbsd
+            version: "7.1"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Unzip
+        run: |
+          unzip npm-packages.zip
+          rm npm-packages.zip rescript-std-*.tgz
+          mv rescript-*.tgz rescript.tgz
+
+      - name: Test on ${{ matrix.os.name }}
+        uses: cross-platform-actions/action@v0.6.0
+        with:
+          operating_system: ${{ matrix.os.name }}
+          version: ${{ matrix.os.version }}
+          shell: bash
+          run: ./test.sh
